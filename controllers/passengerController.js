@@ -1,0 +1,94 @@
+// controllers/passengerController.js
+import Passenger from '../models/Passenger.js';
+import User from '../models/user.js';
+
+// Add a new passenger
+export const addPassenger = async (req, res) => {
+    try {
+        const { userId, passportNumber, phone, address, dateOfBirth } = req.body;
+
+        // Check if user exists
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const newPassenger = new Passenger({
+            userId,
+            passportNumber,
+            phone,
+            address,
+            dateOfBirth
+        });
+
+        await newPassenger.save();
+        res.status(201).json({ message: 'Passenger added successfully', passenger: newPassenger });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Update passenger details
+export const updatePassenger = async (req, res) => {
+    try {
+        const { passengerId, passportNumber, phone, address, dateOfBirth } = req.body;
+
+        const passenger = await Passenger.findById(passengerId);
+        if (!passenger) {
+            return res.status(404).json({ message: 'Passenger not found' });
+        }
+
+        passenger.passportNumber = passportNumber || passenger.passportNumber;
+        passenger.phone = phone || passenger.phone;
+        passenger.address = address || passenger.address;
+        passenger.dateOfBirth = dateOfBirth || passenger.dateOfBirth;
+
+        await passenger.save();
+        res.status(200).json({ message: 'Passenger details updated successfully', passenger });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Fetch all passengers
+export const getAllPassengers = async (req, res) => {
+    try {
+        const passengers = await Passenger.find().populate('userId');
+        res.status(200).json({ passengers });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Fetch a specific passenger by ID
+export const getPassengerById = async (req, res) => {
+    try {
+        const passenger = await Passenger.findById(req.params.id).populate('userId');
+        if (!passenger) {
+            return res.status(404).json({ message: 'Passenger not found' });
+        }
+        res.status(200).json({ passenger });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Delete a passenger
+export const deletePassenger = async (req, res) => {
+    try {
+        const passenger = await Passenger.findById(req.params.id);
+        if (!passenger) {
+            return res.status(404).json({ message: 'Passenger not found' });
+        }
+        
+        await passenger.remove();
+        res.status(200).json({ message: 'Passenger deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};

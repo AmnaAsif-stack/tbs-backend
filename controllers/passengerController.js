@@ -3,9 +3,13 @@ import Passenger from '../models/Passenger.js';
 import User from '../models/user.js';
 
 // Add a new passenger
+import mongoose from 'mongoose';
+
+
 export const addPassenger = async (req, res) => {
     try {
-        const { userId, passportNumber, phone, address, dateOfBirth } = req.body;
+        const { passportNumber, phone, address, dateOfBirth } = req.body;
+        const userId = req.userId;  // Get the logged-in user's userId from the token
 
         // Check if user exists
         const user = await User.findById(userId);
@@ -24,7 +28,7 @@ export const addPassenger = async (req, res) => {
         await newPassenger.save();
         res.status(201).json({ message: 'Passenger added successfully', passenger: newPassenger });
     } catch (error) {
-        console.error(error);
+        console.error("Error in addPassenger:", error);
         res.status(500).json({ message: 'Server error' });
     }
 };
@@ -55,10 +59,17 @@ export const updatePassenger = async (req, res) => {
 // Fetch all passengers
 export const getAllPassengers = async (req, res) => {
     try {
-        const passengers = await Passenger.find().populate('userId');
+        const userId = req.userId;  // Get the logged-in user's userId from the token
+
+        // Fetch passengers associated with the logged-in user
+        const passengers = await Passenger.find({ userId }).populate('userId');
+        if (!passengers) {
+            return res.status(404).json({ message: 'No passengers found for this user' });
+        }
+
         res.status(200).json({ passengers });
     } catch (error) {
-        console.error(error);
+        console.error("Error in getAllPassengers:", error);
         res.status(500).json({ message: 'Server error' });
     }
 };

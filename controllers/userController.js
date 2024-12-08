@@ -7,7 +7,6 @@ import User from '../models/user.js';
 const handleError = (res, error, status = 500) => {
     res.status(status).send({ message: error.message || 'Server Error' });
 };
-
 // User Signup
 export const registerUser = async (req, res) => {
     try {
@@ -39,19 +38,16 @@ export const registerUser = async (req, res) => {
 
         // Generate JWT token
         const token = jwt.sign(
-            { userId: user._id, role: user.role }, // Use 'user', not 'admin'
+            { userId: user._id, role: user.role }, // Use 'user', not 'newUser'
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
-        const userId = newUser._id;
-
-       
 
         res.status(201).send({
             message: 'User registered successfully',
             token,
             role: user.role, // Explicitly return role
-            userId: userId, // Return the userId (which is _id)
+            userId: user._id, // Return the userId (which is _id)
         });
     } catch (error) {
         handleError(res, error);

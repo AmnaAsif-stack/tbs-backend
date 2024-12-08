@@ -15,7 +15,7 @@ const router = express.Router();
 router.post('/add', authenticateToken, addPassenger);
 
 // Update passenger details
-router.put('/update', authenticateToken, updatePassenger);
+router.get('/', authenticateToken, getAllPassengers);
 
 // Get all passengers
 router.get('/', authenticateToken, getAllPassengers);
